@@ -10,6 +10,8 @@
     "@popperjs/core": "^2.9.2",
     "@react-icons/all-files": "^4.1.0",
     "@reduxjs/toolkit": "^1.6.2",
+    "@stripe/react-stripe-js": "^2.4.0",
+    "@stripe/stripe-js": "^2.2.2",
     "@tailwindcss/forms": "^0.3.2",
     "@tailwindcss/typography": "^0.5.2",
     "@testing-library/jest-dom": "^5.16.1",

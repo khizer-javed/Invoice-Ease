@@ -19,7 +19,10 @@ import { UserContextService } from './user-context.service';
 import { Validate } from '../../helpers/validate';
 import { UNIQUE_KEY_VIOLATION } from 'src/constants';
 import { GlobalDbService } from '../global-db/global-db.service';
+import { Sequelize } from 'sequelize';
+import Stripe from 'stripe';
 
+const stripe = new Stripe(STRIPE_KEY);
 @Injectable()
 export class AuthService {
   constructor(
@@ -68,7 +71,7 @@ export class AuthService {
       const token: any = await this.loginTokenService.generateToken(savedUser, {
         ...clientInfo,
       });
-      return token
+      return token;
     } catch (error) {
       if (error.parent.code === UNIQUE_KEY_VIOLATION) {
         throw new ConflictException('User already exists');
@@ -206,4 +209,132 @@ export class AuthService {
     );
     return loggedInUser;
   }
+
+  updateMonthlySubscriptionStatus = async (data: any) => {
+    const { status, packageName } = data;
+    // const { companyId } = loggedInUser.user;
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1;
+    const currentYear = currentDate.getFullYear();
+
+    try {
+      await this.DB.repo.MonthlySubscription.update(
+        { status },
+        {
+          where: Sequelize.and(
+            // { companyId },
+            Sequelize.literal(`EXTRACT(MONTH FROM "date") = ${currentMonth}`),
+            Sequelize.literal(`EXTRACT(YEAR FROM "date") = ${currentYear}`),
+          ),
+        },
+      );
+
+      if (status === 'Paid') {
+        const response = await this.DB.repo.Package.findOne({
+          where: { name: packageName },
+          raw: true,
+        });
+        await this.DB.repo.Company.update(
+          { packageId: response.id },
+          // { where: { id: companyId } },
+        );
+      }
+
+      return { message: 'Subscription complete!' };
+    } catch (error) {
+      throw new ConflictException(error.message);
+    }
+  };
+
+  addNewSubscription = async (data: any, loggedInUser: any) => {
+    const { repo } = this.DB;
+    const { companyId } = loggedInUser.user;
+    const { packageName, paymentMethod: payment_method } = data;
+
+    // ----- Checking if same package is selected
+    const existingPackage = await repo.Package.findOne({
+      where: { name: packageName },
+      include: {
+        model: repo.Company,
+        required: true,
+        where: { id: companyId },
+      },
+    });
+
+    if (existingPackage) {
+      throw new ConflictException(
+        'Package already in use! Please select a new package.',
+      );
+    }
+
+    // ----- Get or Create Customer
+    let customer: any = { id: null };
+    const response = await repo.MonthlySubscription.findOne({
+      where: { companyId },
+    });
+
+    customer.id = response?.customerId;
+    if (!response) {
+      customer = await this.createCustomer(payment_method, loggedInUser);
+    }
+
+    // ----- Create Subscription
+    const myPackage = await repo.Package.findOne({
+      where: { name: packageName },
+      raw: true,
+    });
+    const subscriptionData = {
+      priceId: myPackage.stripeId,
+      customerId: customer.id,
+    };
+    const subscription = await this.createSubscription(subscriptionData);
+
+    const subData: any = {
+      date: dayjs(),
+      companyId,
+      createdAt: dayjs(),
+      customerId: customer.id,
+    };
+
+    if (subscription.status !== 'requires_action') {
+      subData.status = 'Paid';
+    }
+    await this.companyService.addMonthlySubscription(subData, myPackage.id);
+
+    return subscription;
+  };
+  
+  createCustomer = (payment_method: string, loggedInUser: any) => {
+    const { username, email } = loggedInUser.user;
+
+    const customer = {
+      payment_method,
+      name: username,
+      email,
+      invoice_settings: {
+        default_payment_method: payment_method,
+      },
+    };
+
+    return stripe.customers.create(customer);
+  };
+
+  createSubscription = async (data: {
+    customerId: string;
+    priceId: string;
+  }) => {
+    const { customerId, priceId } = data;
+
+    const response = await stripe.subscriptions.create({
+      customer: customerId,
+      items: [{ price: priceId }],
+      expand: ['latest_invoice.payment_intent'],
+    });
+
+    return {
+      clientSecret:
+        response['latest_invoice']['payment_intent']['client_secret'],
+      status: response['latest_invoice']['payment_intent']['status'],
+    };
+  };
 }

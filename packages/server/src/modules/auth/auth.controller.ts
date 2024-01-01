@@ -22,7 +22,7 @@ import { ResetPasswordGuard } from './guards/reset-password.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private service: AuthService) {}
 
   @Post('/sign-in')
   login(
@@ -31,7 +31,7 @@ export class AuthController {
     @Ip() ip: string,
     @Headers('user-agent') userAgent: any,
   ): Promise<{ token: string }> {
-    return this.authService.login(authCredentialsDto, {
+    return this.service.login(authCredentialsDto, {
       ip,
       userAgent,
     });
@@ -40,7 +40,7 @@ export class AuthController {
   @Get('/sign-out')
   @UseGuards(AuthGuard())
   logout(@GetToken() token: string): any {
-    this.authService.logout(token);
+    this.service.logout(token);
     return { success: true };
   }
 
@@ -50,14 +50,14 @@ export class AuthController {
     @Ip() ip: string,
     @Headers('user-agent') userAgent: any,
   ): Promise<any> {
-    return this.authService.signUp(createUserDto, { ip, userAgent });
+    return this.service.signUp(createUserDto, { ip, userAgent });
   }
 
   @Post('/forgotPassword')
   forgotPassword(
     @Body(ValidationPipe) forgotPasswordDto: ForgotPasswordDto,
   ): Promise<any> {
-    return this.authService.forgotPassword(forgotPasswordDto);
+    return this.service.forgotPassword(forgotPasswordDto);
   }
 
   @Put('/resetPassword/:token')
@@ -66,7 +66,7 @@ export class AuthController {
     @Body(ValidationPipe) authResetPasswordDto: AuthResetPasswordDto,
     @Param('token') token: string,
   ): Promise<any> {
-    return this.authService.resetPassword(authResetPasswordDto, token);
+    return this.service.resetPassword(authResetPasswordDto, token);
   }
 
   @Post('/changePassword')
@@ -75,7 +75,7 @@ export class AuthController {
     @Body() data: any,
     @GetLoggedInUser() loggedInUser: any,
   ): Promise<void> {
-    return this.authService.changePassword(data, loggedInUser);
+    return this.service.changePassword(data, loggedInUser);
   }
 
   @Post('/updatePassword')
@@ -84,6 +84,16 @@ export class AuthController {
     @Body() data: any,
     @GetLoggedInUser() loggedInUser: any,
   ): Promise<void> {
-    return this.authService.updatePassword(data, loggedInUser);
+    return this.service.updatePassword(data, loggedInUser);
+  }
+
+  @Post('update-subscription-status')
+  updateMonthlySubscriptionStatus(@Body() body: any) {
+    return this.service.updateMonthlySubscriptionStatus(body);
+  }
+
+  @Post('/create-subcription')
+  addNewSubscription(@Body() body: any) {
+    return this.service.addNewSubscription(body);
   }
 }
