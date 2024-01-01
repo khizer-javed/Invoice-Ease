@@ -13,7 +13,7 @@ import AppRoute from "@/components/route/AppRoute";
 const { AUTHENTICATED_ENTRY_PATH } = appConfig;
 
 const AllRoutes = (props) => {
-  const userAuthority = useSelector((state) => state.auth.user.authority);
+  const userAuthority = useSelector((state) => state.auth?.loggedInUser?.user?.authority);
 
   return (
     <Routes>

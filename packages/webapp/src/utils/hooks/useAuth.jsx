@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from "react-redux";
-import { setUser, initialState } from "@/store/auth/userSlice";
+import { setLoggedInUser, initialState } from "@/store/auth/userSlice";
 import { userSignIn, userSignOut } from "@/services/auth";
 import { onSignInSuccess, onSignOutSuccess } from "@/store/auth/sessionSlice";
 import appConfig from "@/configs/app.config";
@@ -20,19 +20,12 @@ function useAuth() {
         const { token } = resp.data;
         dispatch(onSignInSuccess(token));
         if (resp.data.user) {
-          dispatch(
-            setUser(
-              resp.data.user || {
-                avatar: "",
-                userName: "Anonymous",
-                authority: ["USER"],
-                email: "",
-              }
-            )
-          );
+          dispatch(setLoggedInUser(resp.data));
         }
         const redirectUrl = query.get(REDIRECT_URL_KEY);
-        navigate(redirectUrl ? redirectUrl : appConfig.AUTHENTICATED_ENTRY_PATH);
+        navigate(
+          redirectUrl ? redirectUrl : appConfig.AUTHENTICATED_ENTRY_PATH
+        );
         return {
           status: "success",
           message: "",
@@ -48,7 +41,7 @@ function useAuth() {
 
   const handleSignOut = () => {
     dispatch(onSignOutSuccess());
-    dispatch(setUser(initialState));
+    dispatch(setLoggedInUser(initialState));
     navigate(appConfig.UN_AUTHENTICATED_ENTRY_PATH);
   };
 

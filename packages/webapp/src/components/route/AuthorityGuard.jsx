@@ -1,14 +1,20 @@
-import React from 'react'
-import { Navigate } from 'react-router-dom'
-import useAuthority from '@/utils/hooks/useAuthority'
+import React, { useEffect } from "react";
+import { Navigate } from "react-router-dom";
+import useAuthority from "@/utils/hooks/useAuthority";
+import { useSelector } from "react-redux";
+const AuthorityGuard = (props) => {
+  const { authority = [], children, superAdmin = false } = props;
+  const { meta, auth } = useSelector((state) => state);
+  const { loggedInUser } = auth;
 
-const AuthorityGuard = props => {
+  if (loggedInUser.isSuperAdmin) {
+    return children;
+  }
 
-	const { userAuthority = [], authority = [], children } = props
+  const to = "/access-denied";
+  const roleMatched = useAuthority(authority, superAdmin);
 
-	const roleMatched = useAuthority(userAuthority, authority)
+  return roleMatched ? children : <Navigate to={to} />;
+};
 
-	return roleMatched ? children : <Navigate to="/access-denied" />
-}
-
-export default AuthorityGuard
+export default AuthorityGuard;

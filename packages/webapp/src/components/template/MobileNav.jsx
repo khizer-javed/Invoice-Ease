@@ -35,7 +35,7 @@ const MobileNav = () => {
 	const direction = useSelector(state => state.theme.direction)
 	const currentRouteKey = useSelector(state => state.base.common.currentRouteKey)
 	const sideNavCollapse = useSelector(state => state.theme.layout.sideNavCollapse)
-	const userAuthority = useSelector((state) => state.auth.user.authority)
+	const userAuthority = useSelector((state) => state.auth?.loggedInUser?.user?.authority)
 
 	const { smaller } = useResponsive()
  

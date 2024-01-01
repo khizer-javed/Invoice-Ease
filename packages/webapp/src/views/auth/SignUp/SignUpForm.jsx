@@ -10,7 +10,7 @@ import {
 } from "@/components/ui";
 import { ActionLink } from "@/components/shared";
 import { onSignInSuccess } from "@/store/auth/sessionSlice";
-import { setUser } from "@/store/auth/userSlice";
+import { setLoggedInUser } from "@/store/auth/userSlice";
 import appConfig from "@/configs/app.config";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -45,16 +45,7 @@ const SignUpForm = (props) => {
       const { token } = resp.data;
       dispatch(onSignInSuccess(token));
       if (resp.data.user) {
-        dispatch(
-          setUser(
-            resp.data.user || {
-              avatar: "",
-              username: "Anonymous",
-              authority: [],
-              email: "",
-            }
-          )
-        );
+        dispatch(setLoggedInUser(resp.data));
       }
       navigate(appConfig.TOUR_PATH);
     } catch (error) {
@@ -73,7 +64,7 @@ const SignUpForm = (props) => {
       setLoading(false);
       return false;
     }
-		return true
+    return true;
   };
 
   return (

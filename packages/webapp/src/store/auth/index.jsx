@@ -1,10 +1,10 @@
 import { combineReducers } from '@reduxjs/toolkit'
 import session from './sessionSlice'
-import user from './userSlice'
+import loggedInUser from './userSlice'
 
 const reducer = combineReducers({
     session,
-    user
+    loggedInUser
 })
 
 export default reducer

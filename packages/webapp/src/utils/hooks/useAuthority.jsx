@@ -1,17 +1,29 @@
-import { useMemo } from 'react'
-import isEmpty from 'lodash/isEmpty'
+import { useMemo } from "react";
+import isEmpty from "lodash/isEmpty";
+import { useSelector } from "react-redux";
 
-function useAuthority(userAuthority = [], authority = [], emptyCheck = false) {
+function useAuthority(
+	authority = [],
+	superAdmin = false,
+	emptyCheck = false
+) {
+	const { user } = useSelector((state) => state.auth.loggedInUser);
+	const userAuthority = user?.authority;
 
-    const roleMatched = useMemo(() => {
-		return authority.some(role => userAuthority.includes(role))
-	}, [authority, userAuthority])
-    
-    if (isEmpty(authority) || isEmpty(userAuthority) || typeof authority === 'undefined') {
-		return !emptyCheck
+	const roleMatched = useMemo(() => {
+		return authority.some((role) => userAuthority.includes(role));
+	}, [authority, userAuthority]);
+
+	if (
+		superAdmin ||
+		isEmpty(authority) ||
+		isEmpty(userAuthority) ||
+		typeof authority === "undefined"
+	) {
+		return !emptyCheck;
 	}
 
-    return roleMatched
+	return roleMatched;
 }
 
-export default useAuthority
+export default useAuthority;
