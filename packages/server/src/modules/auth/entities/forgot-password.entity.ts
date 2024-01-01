@@ -11,7 +11,7 @@ import {
 import { User } from 'src/modules/user/entities/user.entity';
 
 @Table({
-  tableName: 'ForgotPasswords',
+  tableName: 'forgot_passwords',
   timestamps: true,
   scopes: {
     active: { where: { isActive: true } },

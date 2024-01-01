@@ -12,7 +12,7 @@ import {
 import { User } from 'src/modules/user/entities/user.entity';
 
 @Table({
-  tableName: 'SuperUsers',
+  tableName: 'super_user',
 })
 export class SuperUser extends Model {
   @PrimaryKey

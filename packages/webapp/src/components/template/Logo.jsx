@@ -8,11 +8,6 @@ const LOGO_SRC_PATH = "/img/logo/";
 const Logo = (props) => {
   const { type, mode, gutter, className, imgClass, style, logoWidth } = props;
 
-  console.log("");
-  console.log("type", type);
-  console.log(`${LOGO_SRC_PATH}logo-${mode}-${type}.svg`);
-
-  const ext = type === "streamline" ? "png" : "svg";
   return (
     <div
       className={classNames("logo", className, gutter)}
@@ -23,7 +18,7 @@ const Logo = (props) => {
     >
       <img
         className={imgClass}
-        src={`${LOGO_SRC_PATH}logo-${mode}-${type}.${ext}`}
+        src={`${LOGO_SRC_PATH}logo-${mode}-${type}.svg`}
         alt={`${APP_NAME} logo`}
       />
     </div>

@@ -11,10 +11,10 @@ module.exports = {
       { name: 'SuperAdmin', createdAt: moment().toDate() },
       { name: 'User', createdAt: moment().toDate() },
     ];
-    await queryInterface.bulkInsert('Roles', roles);
+    await queryInterface.bulkInsert('roles', roles);
   },
 
   async down(queryInterface, Sequelize) {
-    console.log('delete Roles');
+    console.log('delete roles');
   },
 };

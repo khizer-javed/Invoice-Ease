@@ -4,7 +4,6 @@ import { DatabaseModule } from './database/database.module';
 import { UserModule } from './modules/user/user.module';
 import { GlobalDbModule } from './modules/global-db/global-db.module';
 import { RoleModule } from './modules/role/role.module';
-import { CompanyModule } from './modules/company/company.module';
 
 @Module({
   imports: [
@@ -13,7 +12,6 @@ import { CompanyModule } from './modules/company/company.module';
     DatabaseModule,
     RoleModule,
     UserModule,
-    CompanyModule
   ],
   controllers: [],
   providers: [],

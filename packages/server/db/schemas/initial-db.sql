@@ -1,7 +1,9 @@
-CREATE TABLE "LoginTokens"
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE "login_tokens"
 (
-  "id" serial PRIMARY KEY,
-  "fkUserId" int NOT NULL,
+  "id" uuid DEFAULT uuid_generate_v4 () PRIMARY KEY,
+  "fkUserId" uuid NOT NULL,
   "token" text NOT NULL,
   "expiredAt" timestamptz,
   "ip" varchar(50),
@@ -10,23 +12,10 @@ CREATE TABLE "LoginTokens"
   "updatedAt" timestamptz
 );
 
-CREATE TABLE "SocialMediaTokens"
+CREATE TABLE "users"
 (
-  "id" serial PRIMARY KEY,
-  "fkUserId" int NOT NULL,
-  "fkSocialMediaTypeId" int NOT NULL,
-  "token" text NOT NULL,
-  "expiredAt" timestamptz,
-  "ip" varchar(50),
-  "userAgent" jsonb,
-  "createdAt" timestamptz NOT NULL,
-  "updatedAt" timestamptz
-);
-
-CREATE TABLE "Users"
-(
-  "id" serial PRIMARY KEY,
-  "fkRoleId" integer NOT NULL,
+  "id" uuid DEFAULT uuid_generate_v4 () PRIMARY KEY,
+  "fkRoleId" uuid NOT NULL,
   "username" varchar(20) NOT NULL UNIQUE,
   "password" varchar(100) NOT NULL,
   "email" varchar(50) NOT NULL UNIQUE,
@@ -36,16 +25,16 @@ CREATE TABLE "Users"
   "salt" varchar(255),
   "createdAt" timestamptz NOT NULL,
   "updatedAt" timestamptz,
-  "fkCreatedBy" integer,
-  "fkUpdatedBy" integer,
+  "fkCreatedBy" uuid,
+  "fkUpdatedBy" uuid,
   "deletedAt" timestamptz,
   "passwordResetAt" timestamptz
 );
 
-CREATE TABLE "ForgotPasswords"
+CREATE TABLE "forgot_passwords"
 (
-  "id" serial PRIMARY KEY,
-  "fkUserId" integer NOT NULL,
+  "id" uuid DEFAULT uuid_generate_v4 () PRIMARY KEY,
+  "fkUserId" uuid NOT NULL,
   "token" varchar(255) NOT NULL,
   "expiredAt" timestamptz NOT NULL,
   "servedAt" timestamptz,
@@ -53,31 +42,31 @@ CREATE TABLE "ForgotPasswords"
   "updatedAt" timestamptz
 );
 
-CREATE TABLE "SuperUsers"
+CREATE TABLE "super_user"
 (
-  "id" serial PRIMARY KEY,
-  "fkUserId" integer NOT NULL,
+  "id" uuid DEFAULT uuid_generate_v4 () PRIMARY KEY,
+  "fkUserId" uuid NOT NULL,
   "isActive" BOOLEAN NOT NULL DEFAULT '1',
   "createdAt" timestamptz NOT NULL,
   "updatedAt" timestamptz
 );
 
-CREATE TABLE "Roles"
+CREATE TABLE "roles"
 (
-  "id" serial PRIMARY KEY,
+  "id" uuid DEFAULT uuid_generate_v4 () PRIMARY KEY,
   "name" varchar(50) NOT NULL,
   "description" TEXT,
   "isActive" BOOLEAN NOT NULL DEFAULT '1',
   "createdAt" timestamptz NOT NULL,
   "updatedAt" timestamptz,
-  "fkCreatedBy" integer,
-  "fkUpdatedBy" integer,
+  "fkCreatedBy" uuid,
+  "fkUpdatedBy" uuid,
   "deletedAt" timestamptz
 );
 
-CREATE TABLE "Permissions"
+CREATE TABLE "permissions"
 (
-  "id" serial PRIMARY KEY,
+  "id" uuid DEFAULT uuid_generate_v4 () PRIMARY KEY,
   "name" varchar NOT NULL,
   "permission" varchar NOT NULL,
   "moduleName" varchar,
@@ -88,100 +77,30 @@ CREATE TABLE "Permissions"
   "deletedAt" timestamptz
 );
 
-CREATE TABLE "RolePermissions"
+CREATE TABLE "role_permissions"
 (
-  "id" serial PRIMARY KEY,
-  "fkRoleId" integer NOT NULL,
-  "fkPermissionId" integer NOT NULL,
+  "id" uuid DEFAULT uuid_generate_v4 () PRIMARY KEY,
+  "fkRoleId" uuid NOT NULL,
+  "fkPermissionId" uuid NOT NULL,
   "createdAt" timestamptz NOT NULL,
   "updatedAt" timestamptz,
-  "fkCreatedBy" integer,
-  "fkUpdatedBy" integer,
+  "fkCreatedBy" uuid,
+  "fkUpdatedBy" uuid,
   "deletedAt" timestamptz
 );
 
-CREATE TABLE "Companies"
-(
-  "id" serial PRIMARY KEY,
-  "name" varchar(250) NOT NULL,
-  "logo" text,
-  "isActive" BOOLEAN NOT NULL DEFAULT '1',
-  "createdAt" timestamptz NOT NULL,
-  "updatedAt" timestamptz,
-  "fkCreatedBy" integer,
-  "fkUpdatedBy" integer,
-  "deletedAt" timestamptz
-);
+ALTER TABLE "users" ADD CONSTRAINT "users_fk0" FOREIGN KEY ("fkRoleId") REFERENCES "roles" ("id");
+ALTER TABLE "users" ADD CONSTRAINT "users_fk1" FOREIGN KEY ("fkCreatedBy") REFERENCES "users" ("id");
+ALTER TABLE "users" ADD CONSTRAINT "users_fk2" FOREIGN KEY ("fkUpdatedBy") REFERENCES "users" ("id");
 
-CREATE TABLE "CompanyUsers"
-(
-  "id" serial PRIMARY KEY,
-  "fkUserId" integer NOT NULL,
-  "fkCompanyId" integer NOT NULL,
-  "isActive" BOOLEAN NOT NULL DEFAULT '1',
-  "createdAt" timestamptz NOT NULL,
-  "updatedAt" timestamptz,
-  "fkCreatedBy" integer,
-  "fkUpdatedBy" integer,
-  "deletedAt" timestamptz
-);
+ALTER TABLE "forgot_passwords" ADD CONSTRAINT "forgot_passwords_fk0" FOREIGN KEY ("fkUserId") REFERENCES "users"("id");
 
-CREATE TABLE "SocialMediaTypes"
-(
-  "id" serial PRIMARY KEY,
-  "name" varchar(20) NOT NULL,
-  "isActive" BOOLEAN NOT NULL DEFAULT '1',
-  "createdAt" timestamptz NOT NULL,
-  "updatedAt" timestamptz
-);
+ALTER TABLE "super_user" ADD FOREIGN KEY ("fkUserId") REFERENCES "users" ("id");
 
-CREATE TABLE "Posts"
-(
-  "id" serial PRIMARY KEY,
-  "fkSocialMediaTypeId" integer NOT NULL,
-  "profile" varchar(20),
-  "status" varchar(20) NOT NULL,
-  "text" varchar(200) NOT NULL,
-  "translation" varchar(200) NOT NULL,
-  "type" varchar(20),
-  "link" varchar(30),
-  "budget" numeric(10,3),
-  "labels" numeric(10,3),
-  "date" timestamptz NOT NULL,
-  "isActive" BOOLEAN NOT NULL DEFAULT '1',
-  "createdAt" timestamptz NOT NULL,
-  "fkCreatedBy" integer,
-  "fkUpdatedBy" integer,
-  "updatedAt" timestamptz
-);
+ALTER TABLE "roles" ADD CONSTRAINT "roles_fk0" FOREIGN KEY ("fkCreatedBy") REFERENCES "users" ("id");
+ALTER TABLE "roles" ADD CONSTRAINT "roles_fk1" FOREIGN KEY ("fkUpdatedBy") REFERENCES "users" ("id");
 
-ALTER TABLE "Users" ADD CONSTRAINT "Users_fk0" FOREIGN KEY ("fkRoleId") REFERENCES "Roles" ("id");
-ALTER TABLE "Users" ADD CONSTRAINT "Users_fk1" FOREIGN KEY ("fkCreatedBy") REFERENCES "Users" ("id");
-ALTER TABLE "Users" ADD CONSTRAINT "Users_fk2" FOREIGN KEY ("fkUpdatedBy") REFERENCES "Users" ("id");
-
-ALTER TABLE "ForgotPasswords" ADD CONSTRAINT "ForgotPasswords_fk0" FOREIGN KEY ("fkUserId") REFERENCES "Users"("id");
-
-ALTER TABLE "Companies" ADD CONSTRAINT "Companies_fk0" FOREIGN KEY ("fkCreatedBy") REFERENCES "Users" ("id");
-ALTER TABLE "Companies" ADD CONSTRAINT "Companies_fk1" FOREIGN KEY ("fkUpdatedBy") REFERENCES "Users" ("id");
-
-ALTER TABLE "SuperUsers" ADD FOREIGN KEY ("fkUserId") REFERENCES "Users" ("id");
-
-ALTER TABLE "Roles" ADD CONSTRAINT "Roles_fk0" FOREIGN KEY ("fkCreatedBy") REFERENCES "Users" ("id");
-ALTER TABLE "Roles" ADD CONSTRAINT "Roles_fk1" FOREIGN KEY ("fkUpdatedBy") REFERENCES "Users" ("id");
-
-ALTER TABLE "RolePermissions" ADD CONSTRAINT "RolePermissions_fk0" FOREIGN KEY ("fkRoleId") REFERENCES "Roles" ("id");
-ALTER TABLE "RolePermissions" ADD CONSTRAINT "RolePermissions_fk1" FOREIGN KEY ("fkPermissionId") REFERENCES "Permissions" ("id");
-ALTER TABLE "RolePermissions" ADD CONSTRAINT "RolePermissions_fk2" FOREIGN KEY ("fkCreatedBy") REFERENCES "Users" ("id");
-ALTER TABLE "RolePermissions" ADD CONSTRAINT "RolePermissions_fk3" FOREIGN KEY ("fkUpdatedBy") REFERENCES "Users" ("id");
-
-ALTER TABLE "CompanyUsers" ADD CONSTRAINT "CompanyUsers_fk0" FOREIGN KEY ("fkUserId") REFERENCES "Users" ("id");
-ALTER TABLE "CompanyUsers" ADD CONSTRAINT "CompanyUsers_fk1" FOREIGN KEY ("fkCompanyId") REFERENCES "Companies" ("id");
-ALTER TABLE "CompanyUsers" ADD CONSTRAINT "CompanyUsers_fk2" FOREIGN KEY ("fkCreatedBy") REFERENCES "Users" ("id");
-ALTER TABLE "CompanyUsers" ADD CONSTRAINT "CompanyUsers_fk3" FOREIGN KEY ("fkUpdatedBy") REFERENCES "Users" ("id");
-
-ALTER TABLE "Posts" ADD CONSTRAINT "Posts_fk0" FOREIGN KEY ("fkSocialMediaTypeId") REFERENCES "SocialMediaTypes" ("id");
-ALTER TABLE "Posts" ADD CONSTRAINT "Posts_fk1" FOREIGN KEY ("fkCreatedBy") REFERENCES "Users" ("id");
-ALTER TABLE "Posts" ADD CONSTRAINT "Posts_fk2" FOREIGN KEY ("fkUpdatedBy") REFERENCES "Users" ("id");
-
-ALTER TABLE "SocialMediaTokens" ADD CONSTRAINT "Posts_fk0" FOREIGN KEY ("fkUserId") REFERENCES "Users" ("id");
-ALTER TABLE "SocialMediaTokens" ADD CONSTRAINT "Posts_fk1" FOREIGN KEY ("fkSocialMediaTypeId") REFERENCES "SocialMediaTypes" ("id");
+ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_fk0" FOREIGN KEY ("fkRoleId") REFERENCES "roles" ("id");
+ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_fk1" FOREIGN KEY ("fkPermissionId") REFERENCES "permissions" ("id");
+ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_fk2" FOREIGN KEY ("fkCreatedBy") REFERENCES "users" ("id");
+ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_fk3" FOREIGN KEY ("fkUpdatedBy") REFERENCES "users" ("id");

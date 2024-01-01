@@ -51,7 +51,6 @@ export const pagination = {
 // Roles
 export const DEFAULT_ROLES = {
   SUPER_ADMIN: 1,
-  COMPANY_ADMIN: 2,
   USER: 3,
 }
 

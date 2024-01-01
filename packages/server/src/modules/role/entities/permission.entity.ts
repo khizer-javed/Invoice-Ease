@@ -12,7 +12,7 @@ import {
 import { RolePermission } from './role-permission.entity';
 
 @Table({
-  tableName: 'Permissions',
+  tableName: 'permissions',
   timestamps: true,
   paranoid: true,
   scopes: {

@@ -5,7 +5,6 @@ import { ForgotPassword } from 'src/modules/auth/entities/forgot-password.entity
 import { Role } from 'src/modules/role/entities/role.entity';
 import { RolePermission } from 'src/modules/role/entities/role-permission.entity';
 import { Permission } from 'src/modules/role/entities/permission.entity';
-import { Company } from 'src/modules/company/entities/company.entity';
 
 const models = [
   User,
@@ -14,8 +13,7 @@ const models = [
   ForgotPassword,
   Role,
   RolePermission,
-  Permission,
-  Company
+  Permission
 ];
 
 export const appModels = models;

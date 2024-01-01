@@ -13,7 +13,7 @@ import {
 import { User } from 'src/modules/user/entities/user.entity';
 
 @Table({
-  tableName: 'LoginTokens',
+  tableName: 'login_tokens',
   timestamps: true,
   scopes: {
     active: { where: { isActive: true } },

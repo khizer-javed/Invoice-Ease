@@ -16,7 +16,6 @@ import {
   BelongsTo,
 } from 'sequelize-typescript';
 import { LoginToken } from 'src/modules/auth/entities/login-token.entity';
-// import { Company } from 'src/modules/company/entities/company.entity';
 import { Role } from 'src/modules/role/entities/role.entity';
 import { SuperUser } from './super-user.entity';
 
@@ -27,7 +26,7 @@ import { SuperUser } from './super-user.entity';
   withPassword: {},
 }))
 @Table({
-  tableName: 'Users',
+  tableName: 'users',
   timestamps: true,
   paranoid: true,
   scopes: {

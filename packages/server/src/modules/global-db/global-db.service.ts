@@ -4,16 +4,15 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import * as moment from 'moment-timezone';
 import { REPOSITORIES } from 'src/constants/repositories';
 import { UNIQUE_KEY_VIOLATION } from 'src/constants';
 import { ForgotPassword } from '../auth/entities/forgot-password.entity';
 import { LoginToken } from '../auth/entities/login-token.entity';
-import { Permission } from '../role/entities/permission.entity';
 import { Role } from '../role/entities/role.entity';
 import { RolePermission } from '../role/entities/role-permission.entity';
 import { SuperUser } from '../user/entities/super-user.entity';
 import { User } from '../user/entities/user.entity';
+import { Permission } from '../role/entities/permission.entity';
 
 @Injectable()
 export class GlobalDbService {
@@ -34,8 +33,6 @@ export class GlobalDbService {
     private readonly RolePermissionRepository: typeof RolePermission,
     @Inject(REPOSITORIES.PERMISSION_REPOSITORY)
     private readonly PermissionRepository: typeof Permission,
-    @Inject(REPOSITORIES.COMPANY_REPOSITORY)
-    private readonly companyRepository: typeof Permission,
   ) {
     this.repo['User'] = this.userRepository;
     this.repo['LoginToken'] = this.loginTokenRepository;
@@ -44,7 +41,6 @@ export class GlobalDbService {
     this.repo['Role'] = this.RoleRepository;
     this.repo['RolePermission'] = this.RolePermissionRepository;
     this.repo['Permission'] = this.PermissionRepository;
-    this.repo['Company'] = this.companyRepository;
   }
 
   async getOne(model: string, params: any) {

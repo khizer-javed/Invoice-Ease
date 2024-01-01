@@ -7,7 +7,6 @@ import { User } from '../user/entities/user.entity';
 import { Role } from '../role/entities/role.entity';
 import { RolePermission } from '../role/entities/role-permission.entity';
 import { Permission } from '../role/entities/permission.entity';
-import { Company } from '../company/entities/company.entity';
 
 export const globalDbProvider = [
   TransactionInterceptor,
@@ -38,9 +37,5 @@ export const globalDbProvider = [
   {
     provide: REPOSITORIES.PERMISSION_REPOSITORY,
     useValue: Permission,
-  },
-  {
-    provide: REPOSITORIES.COMPANY_REPOSITORY,
-    useValue: Company,
   },
 ];

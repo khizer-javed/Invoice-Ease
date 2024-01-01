@@ -11,6 +11,7 @@ const sequelizeOptions: any = {
   dialect: process.env.DB_DIALECT,
   client: process.env.DB_CLIENT,
   logging: false,
+  synchronize: false
 };
 
 export const databaseProviders = [

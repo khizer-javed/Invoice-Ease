@@ -6,16 +6,14 @@ import {
   AutoIncrement,
   AllowNull,
   DataType,
-  ForeignKey,
-  HasMany,
-  BelongsTo,
+  ForeignKey, BelongsTo
 } from 'sequelize-typescript';
 import { Role } from './role.entity';
 import { Permission } from './permission.entity';
 import { User } from 'src/modules/user/entities/user.entity';
 
 @Table({
-  tableName: 'RolePermissions',
+  tableName: 'role_permissions',
   timestamps: true,
   paranoid: true,
   scopes: {

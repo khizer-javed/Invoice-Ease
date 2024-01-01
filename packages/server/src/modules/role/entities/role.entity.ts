@@ -15,7 +15,7 @@ import { User } from 'src/modules/user/entities/user.entity';
 import { RolePermission } from './role-permission.entity';
 
 @Table({
-  tableName: 'Roles',
+  tableName: 'roles',
   timestamps: true,
   paranoid: true,
   scopes: {

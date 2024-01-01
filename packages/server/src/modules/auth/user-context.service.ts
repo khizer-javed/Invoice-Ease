@@ -29,7 +29,6 @@ export class UserContextService {
       ]);
 
       const isSuperAdmin = !_.isEmpty(cUser.SuperUser);
-      const isCompanyAdmin = !_.isEmpty(cUser.CompanyAdmin);
 
       const uC: any = {
         user: {
@@ -44,7 +43,6 @@ export class UserContextService {
         },
         baseUrl: BASE_URL,
         isSuperAdmin,
-        isCompanyAdmin,
       };
 
       return uC;
@@ -86,13 +84,6 @@ export class UserContextService {
             where: this.isActiveWhere,
             attributes: ['id'],
           },
-          // {
-          //   model: repo.Company,
-          //   as: 'CompanyAdmin',
-          //   required: false,
-          //   where: this.isActiveWhere,
-          //   attributes: ['id', 'name'],
-          // },
         ],
       });
       if (cUser && cUser.getDataValue('isActive')) {
