@@ -17,11 +17,18 @@ import { AuthResetPasswordDto } from './dto/auth-reset-password.dto';
 import { LoginToken } from './entities/login-token.entity';
 import { UserContextService } from './user-context.service';
 import { Validate } from '../../helpers/validate';
-import { UNIQUE_KEY_VIOLATION } from 'src/constants';
+import {
+  DEFAULT_ROLES,
+  STRIPE_KEY,
+  STRIPE_PRODUCT_ID,
+  SUBSCRIPTION_STATUS,
+  UNIQUE_KEY_VIOLATION,
+} from 'src/constants';
 import { GlobalDbService } from '../global-db/global-db.service';
-import { Sequelize } from 'sequelize';
+import { Sequelize, Transaction } from 'sequelize';
 import Stripe from 'stripe';
 
+const dayjs = require('dayjs');
 const stripe = new Stripe(STRIPE_KEY);
 @Injectable()
 export class AuthService {
@@ -56,22 +63,26 @@ export class AuthService {
     return token;
   }
 
-  async signUp(user: any, clientInfo: any) {
+  async signUp(user: any) {
     const { password } = user;
     const userWhere: any = {};
     userWhere.username = user.username;
     const existingUser = await this.DB.getOne('User', userWhere);
+
     if (existingUser) {
       throw new ConflictException('Username already exists.');
     }
     user.salt = await bcrypt.genSalt();
     user.password = await bcrypt.hash(password, user.salt);
+
+    const uerRole = await this.DB.repo.Role.findOne({
+      where: { name: DEFAULT_ROLES.USER },
+      raw: true,
+    });
+    user.roleId = uerRole.id;
+
     try {
-      const savedUser = await this.DB.repo.User.create(user);
-      const token: any = await this.loginTokenService.generateToken(savedUser, {
-        ...clientInfo,
-      });
-      return token;
+      return this.DB.repo.User.create(user);
     } catch (error) {
       if (error.parent.code === UNIQUE_KEY_VIOLATION) {
         throw new ConflictException('User already exists');
@@ -211,8 +222,7 @@ export class AuthService {
   }
 
   updateMonthlySubscriptionStatus = async (data: any) => {
-    const { status, packageName } = data;
-    // const { companyId } = loggedInUser.user;
+    const { status, userId } = data;
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1;
     const currentYear = currentDate.getFullYear();
@@ -222,23 +232,12 @@ export class AuthService {
         { status },
         {
           where: Sequelize.and(
-            // { companyId },
+            { userId },
             Sequelize.literal(`EXTRACT(MONTH FROM "date") = ${currentMonth}`),
             Sequelize.literal(`EXTRACT(YEAR FROM "date") = ${currentYear}`),
           ),
         },
       );
-
-      if (status === 'Paid') {
-        const response = await this.DB.repo.Package.findOne({
-          where: { name: packageName },
-          raw: true,
-        });
-        await this.DB.repo.Company.update(
-          { packageId: response.id },
-          // { where: { id: companyId } },
-        );
-      }
 
       return { message: 'Subscription complete!' };
     } catch (error) {
@@ -246,67 +245,69 @@ export class AuthService {
     }
   };
 
-  addNewSubscription = async (data: any, loggedInUser: any) => {
+  addNewSubscription = async (data: any, clientInfo: any) => {
     const { repo } = this.DB;
-    const { companyId } = loggedInUser.user;
-    const { packageName, paymentMethod: payment_method } = data;
-
-    // ----- Checking if same package is selected
-    const existingPackage = await repo.Package.findOne({
-      where: { name: packageName },
-      include: {
-        model: repo.Company,
-        required: true,
-        where: { id: companyId },
-      },
-    });
-
-    if (existingPackage) {
-      throw new ConflictException(
-        'Package already in use! Please select a new package.',
-      );
-    }
+    const { userData, paymentData } = data;
+    const { paymentMethod: payment_method } = paymentData;
+    const savedUser = await this.signUp(userData);
+    const userId = savedUser.id;
 
     // ----- Get or Create Customer
     let customer: any = { id: null };
     const response = await repo.MonthlySubscription.findOne({
-      where: { companyId },
+      where: { userId },
     });
 
     customer.id = response?.customerId;
     if (!response) {
-      customer = await this.createCustomer(payment_method, loggedInUser);
+      customer = await this.createCustomer(payment_method, savedUser);
     }
 
-    // ----- Create Subscription
-    const myPackage = await repo.Package.findOne({
-      where: { name: packageName },
-      raw: true,
-    });
     const subscriptionData = {
-      priceId: myPackage.stripeId,
+      priceId: STRIPE_PRODUCT_ID,
       customerId: customer.id,
     };
     const subscription = await this.createSubscription(subscriptionData);
 
     const subData: any = {
       date: dayjs(),
-      companyId,
+      userId,
       createdAt: dayjs(),
       customerId: customer.id,
+      paymentMethodId: payment_method,
+      subscriptionId: subscription.subscriptionId,
+      subscriptionItemId: subscription.subscriptionItemId,
     };
 
     if (subscription.status !== 'requires_action') {
-      subData.status = 'Paid';
+      subData.status = SUBSCRIPTION_STATUS.PAID;
     }
-    await this.companyService.addMonthlySubscription(subData, myPackage.id);
+    await this.addMonthlySubscription(subData);
 
-    return subscription;
+    const loggedInUser: any = await this.loginTokenService.generateToken(
+      savedUser,
+      {
+        ...clientInfo,
+      },
+    );
+
+    return { ...subscription, loggedInUser };
   };
-  
-  createCustomer = (payment_method: string, loggedInUser: any) => {
-    const { username, email } = loggedInUser.user;
 
+  addMonthlySubscription = async (data: {
+    date: Date;
+    userId: string;
+    customerId: string;
+    subscriptionId: string;
+    status: string;
+    createdAt: string;
+  }) => {
+    data.createdAt = dayjs();
+    await this.DB.repo.MonthlySubscription.create(data);
+  };
+
+  createCustomer = (payment_method: string, user: any) => {
+    const { username, email } = user;
     const customer = {
       payment_method,
       name: username,
@@ -335,6 +336,8 @@ export class AuthService {
       clientSecret:
         response['latest_invoice']['payment_intent']['client_secret'],
       status: response['latest_invoice']['payment_intent']['status'],
+      subscriptionId: response.id,
+      subscriptionItemId: response.items.data[0].id,
     };
   };
 }

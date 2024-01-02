@@ -13,6 +13,7 @@ import { RolePermission } from '../role/entities/role-permission.entity';
 import { SuperUser } from '../user/entities/super-user.entity';
 import { User } from '../user/entities/user.entity';
 import { Permission } from '../role/entities/permission.entity';
+import { MonthlySubscription } from '../auth/entities/monthly-subscriptions.entity';
 
 @Injectable()
 export class GlobalDbService {
@@ -33,6 +34,8 @@ export class GlobalDbService {
     private readonly RolePermissionRepository: typeof RolePermission,
     @Inject(REPOSITORIES.PERMISSION_REPOSITORY)
     private readonly PermissionRepository: typeof Permission,
+    @Inject(REPOSITORIES.MONTHLY_SUBSCRIPTION_REPOSITORY)
+    private readonly monthlySubscriptionRepo: typeof MonthlySubscription,
   ) {
     this.repo['User'] = this.userRepository;
     this.repo['LoginToken'] = this.loginTokenRepository;
@@ -41,6 +44,7 @@ export class GlobalDbService {
     this.repo['Role'] = this.RoleRepository;
     this.repo['RolePermission'] = this.RolePermissionRepository;
     this.repo['Permission'] = this.PermissionRepository;
+    this.repo['MonthlySubscription'] = this.monthlySubscriptionRepo;
   }
 
   async getOne(model: string, params: any) {

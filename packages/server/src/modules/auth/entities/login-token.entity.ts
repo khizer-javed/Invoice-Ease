@@ -1,16 +1,15 @@
 import { json } from 'sequelize';
 import {
-  Table,
-  Column,
-  Model,
-  PrimaryKey,
-  AutoIncrement,
   AllowNull,
+  BelongsTo,
+  Column,
   DataType,
   ForeignKey,
-  BelongsTo,
+  Model,
+  Table,
 } from 'sequelize-typescript';
 import { User } from 'src/modules/user/entities/user.entity';
+import { PrimaryGeneratedColumn } from 'typeorm';
 
 @Table({
   tableName: 'login_tokens',
@@ -20,18 +19,16 @@ import { User } from 'src/modules/user/entities/user.entity';
   },
 })
 export class LoginToken extends Model {
-  @PrimaryKey
-  @AutoIncrement
-  @Column(DataType.INTEGER)
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ForeignKey(() => User)
   @AllowNull(false)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     field: 'fkUserId',
   })
-  userId: number;
+  userId: string;
 
   @AllowNull(false)
   @Column(DataType.TEXT)
@@ -40,7 +37,7 @@ export class LoginToken extends Model {
   @Column(DataType.DATE)
   expiredAt: Date;
 
-  @Column(DataType.STRING(50))
+  @Column(DataType.TEXT)
   ip: string;
 
   @AllowNull(true)
@@ -53,7 +50,7 @@ export class LoginToken extends Model {
 
   @Column(DataType.DATE)
   updatedAt: Date;
-  
+
   //-- ASSOCIATIONS
 
   @BelongsTo(() => User)

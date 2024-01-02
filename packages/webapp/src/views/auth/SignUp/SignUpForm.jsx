@@ -31,26 +31,14 @@ const SignUpForm = (props) => {
     setIsExited(false);
   };
 
-  const isComplete = async () => {
-    const response = await userSignUp(signupData);
-    const { token } = response.data;
-    dispatch(onSignInSuccess(token));
-    if (response.data.user) {
-      dispatch(setLoggedInUser(response.data));
-    }
-    navigate(appConfig.TOUR_PATH);
-  };
-
   return (
     <div className={className}>
       {step === STEPS.SIGNUP && (
         <UserDetails nextStep={nextStep} step={step} signupData={signupData} />
       )}
-
       {step === STEPS.SUBSCRIPTION && (
-        <SubscriptionForm prevStep={prevStep} isComplete={isComplete} />
+        <SubscriptionForm prevStep={prevStep} signupData={signupData} />
       )}
-
       <div className="mt-4 text-center">
         <span>Already have an account? </span>
         <ActionLink to={signInUrl}>Sign In</ActionLink>

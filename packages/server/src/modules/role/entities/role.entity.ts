@@ -1,17 +1,16 @@
 import {
-  Table,
-  Column,
-  Model,
-  PrimaryKey,
-  AutoIncrement,
-  Default,
   AllowNull,
+  Column,
   DataType,
+  Default,
   ForeignKey,
   HasMany,
   HasOne,
+  Model,
+  Table,
 } from 'sequelize-typescript';
 import { User } from 'src/modules/user/entities/user.entity';
+import { PrimaryGeneratedColumn } from 'typeorm';
 import { RolePermission } from './role-permission.entity';
 
 @Table({
@@ -23,13 +22,11 @@ import { RolePermission } from './role-permission.entity';
   },
 })
 export class Role extends Model {
-  @PrimaryKey
-  @AutoIncrement
-  @Column(DataType.INTEGER)
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @AllowNull(false)
-  @Column(DataType.STRING)
+  @Column(DataType.TEXT)
   name: string;
 
   @Column(DataType.TEXT)
@@ -49,17 +46,17 @@ export class Role extends Model {
 
   @ForeignKey(() => User)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     field: 'fkCreatedBy',
   })
-  createdBy: number;
+  createdBy: string;
 
   @ForeignKey(() => User)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     field: 'fkUpdatedBy',
   })
-  updatedBy: number;
+  updatedBy: string;
 
   @Column(DataType.DATE)
   deletedAt: Date;

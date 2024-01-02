@@ -1,16 +1,16 @@
 import {
-  Table,
-  Column,
-  Model,
-  PrimaryKey,
-  AutoIncrement,
   AllowNull,
+  BelongsTo,
+  Column,
   DataType,
-  ForeignKey, BelongsTo
+  ForeignKey,
+  Model,
+  Table,
 } from 'sequelize-typescript';
-import { Role } from './role.entity';
-import { Permission } from './permission.entity';
 import { User } from 'src/modules/user/entities/user.entity';
+import { PrimaryGeneratedColumn } from 'typeorm';
+import { Permission } from './permission.entity';
+import { Role } from './role.entity';
 
 @Table({
   tableName: 'role_permissions',
@@ -21,26 +21,24 @@ import { User } from 'src/modules/user/entities/user.entity';
   },
 })
 export class RolePermission extends Model {
-  @PrimaryKey
-  @AutoIncrement
-  @Column(DataType.INTEGER)
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ForeignKey(() => Role)
   @AllowNull(false)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     field: 'fkRoleId',
   })
-  roleId: number;
+  roleId: string;
 
   @ForeignKey(() => Role)
   @AllowNull(false)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     field: 'fkPermissionId',
   })
-  permissionId: number;
+  permissionId: string;
 
   @AllowNull(false)
   @Column(DataType.DATE)
@@ -51,21 +49,21 @@ export class RolePermission extends Model {
 
   @ForeignKey(() => User)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     field: 'fkCreatedBy',
   })
-  createdBy: number;
+  createdBy: string;
 
   @ForeignKey(() => User)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     field: 'fkUpdatedBy',
   })
-  updatedBy: number;
+  updatedBy: string;
 
   @Column(DataType.DATE)
   deletedAt: Date;
-  
+
   //-- ASSOCIATIONS
 
   @BelongsTo(() => Role, { foreignKey: 'roleId' })

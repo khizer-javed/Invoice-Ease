@@ -1,14 +1,13 @@
 import {
-  Table,
-  Column,
-  Model,
-  PrimaryKey,
-  AutoIncrement,
-  Default,
   AllowNull,
+  Column,
   DataType,
+  Default,
   HasMany,
+  Model,
+  Table,
 } from 'sequelize-typescript';
+import { PrimaryGeneratedColumn } from 'typeorm';
 import { RolePermission } from './role-permission.entity';
 
 @Table({
@@ -20,24 +19,22 @@ import { RolePermission } from './role-permission.entity';
   },
 })
 export class Permission extends Model {
-  @PrimaryKey
-  @AutoIncrement
-  @Column(DataType.INTEGER)
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @AllowNull(false)
-  @Column(DataType.STRING)
+  @Column(DataType.TEXT)
   name: string;
 
   @AllowNull(false)
-  @Column(DataType.STRING)
+  @Column(DataType.TEXT)
   permission: string;
 
   @AllowNull(false)
-  @Column(DataType.STRING)
+  @Column(DataType.TEXT)
   moduleName: string;
 
-  @Column(DataType.STRING)
+  @Column(DataType.TEXT)
   parent: string;
 
   @Default(true)
@@ -54,7 +51,7 @@ export class Permission extends Model {
 
   @Column(DataType.DATE)
   deletedAt: Date;
-  
+
   //-- ASSOCIATIONS
 
   @HasMany(() => RolePermission, { foreignKey: 'permissionId' })

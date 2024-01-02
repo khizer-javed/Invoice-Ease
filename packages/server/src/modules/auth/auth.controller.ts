@@ -9,6 +9,7 @@ import {
   UseGuards,
   Ip,
   Headers,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateUserDto } from '../user/dto/create-user.dto';
@@ -19,6 +20,9 @@ import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { AuthResetPasswordDto } from './dto/auth-reset-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordGuard } from './guards/reset-password.guard';
+import { TransactionInterceptor } from 'src/database/transaction.interceptor';
+import { TransactionParam } from 'src/database/transaction-param.decorator';
+import { Transaction } from 'sequelize';
 
 @Controller('auth')
 export class AuthController {
@@ -45,12 +49,8 @@ export class AuthController {
   }
 
   @Post('/sign-up')
-  signUp(
-    @Body(ValidationPipe) createUserDto: CreateUserDto,
-    @Ip() ip: string,
-    @Headers('user-agent') userAgent: any,
-  ): Promise<any> {
-    return this.service.signUp(createUserDto, { ip, userAgent });
+  signUp(@Body(ValidationPipe) createUserDto: CreateUserDto): Promise<any> {
+    return this.service.signUp(createUserDto);
   }
 
   @Post('/forgotPassword')
@@ -93,7 +93,11 @@ export class AuthController {
   }
 
   @Post('/create-subcription')
-  addNewSubscription(@Body() body: any) {
-    return this.service.addNewSubscription(body);
+  addNewSubscription(
+    @Body() body: any,
+    @Ip() ip: string,
+    @Headers('user-agent') userAgent: any,
+  ) {
+    return this.service.addNewSubscription(body, { ip, userAgent });
   }
 }

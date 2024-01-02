@@ -5,6 +5,7 @@ import { ForgotPassword } from 'src/modules/auth/entities/forgot-password.entity
 import { Role } from 'src/modules/role/entities/role.entity';
 import { RolePermission } from 'src/modules/role/entities/role-permission.entity';
 import { Permission } from 'src/modules/role/entities/permission.entity';
+import { MonthlySubscription } from 'src/modules/auth/entities/monthly-subscriptions.entity';
 
 const models = [
   User,
@@ -13,7 +14,8 @@ const models = [
   ForgotPassword,
   Role,
   RolePermission,
-  Permission
+  Permission,
+  MonthlySubscription,
 ];
 
 export const appModels = models;

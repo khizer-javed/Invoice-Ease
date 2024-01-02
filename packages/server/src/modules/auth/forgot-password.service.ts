@@ -23,7 +23,7 @@ export class ForgotPasswordService {
     private readonly resetPasswordEmailService: any,
   ) {}
 
-  async generateRequest(userId: number): Promise<boolean> {
+  async generateRequest(userId: string): Promise<boolean> {
     let resetRequest = await this.forgotPasswordRepository.findOne({
       where: {
         expiredAt: { [Op.gte]: moment().toDate() },

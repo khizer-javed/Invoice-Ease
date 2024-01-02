@@ -1,5 +1,5 @@
 import ApiService from "./ApiService";
-const PRIFIX = "stripe";
+const PRIFIX = "auth";
 
 export async function createSubscription(data) {
   return ApiService.fetchData({

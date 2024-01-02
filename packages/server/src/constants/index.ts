@@ -3,33 +3,18 @@ require('dotenv').config();
 const KB = 1024;
 const MB = 1024 * KB;
 
-const STAGING = 'staging'
-const PRODUCTION = 'production'
-
-//Development
-let baseUrl = 'http://localhost:4500';
-let clientUrl = 'http://localhost:3000';
-let port = 4500;
-
-if (process.env.NODE_ENV === PRODUCTION) {
-  baseUrl = 'https://[].com';
-  clientUrl = 'https://[].com';
-  port = 5600;
-} else if (process.env.NODE_ENV === STAGING) {
-  baseUrl = 'https://[].com';
-  clientUrl = 'https://[].com';
-  port = 5600;
-}
-
-export const PORT = port;
-export const BASE_URL = baseUrl;
-export const CLIENT_URL = clientUrl;
-export const SALT_ROUNDS = 10;
+export const PORT = process.env?.PORT;
+export const BASE_URL = process.env?.BASE_URL;
+export const CLIENT_URL = process.env?.CLIENT_URL;
+export const SALT_ROUNDS = process.env?.SALT_ROUNDS;
 
 export const DEFAULT_PASSPORT_STRATEGY = 'jwt';
 export const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 export const JWT_TOKEN_EXPIRY_DEFAULT = 3600 * 8; //default 8 hours expiry value in seconds
 export const JWT_TOKEN_EXPIRY_REMEMBER_ME = 3600 * 730; //default 1 month expiry value in seconds
+
+export const STRIPE_PRODUCT_ID = process.env.STRIPE_PRODUCT_ID;
+export const STRIPE_KEY = process.env.STRIPE_KEY;
 
 export const TOKEN_EXPIRY_DEFAULT = 8; //default 8 hours expiry
 export const TOKEN_EXPIRY_REMEMBER_ME = 1; //default 1 month expiry
@@ -50,9 +35,9 @@ export const pagination = {
 
 // Roles
 export const DEFAULT_ROLES = {
-  SUPER_ADMIN: 1,
-  USER: 3,
-}
+  SUPER_ADMIN: 'SuperAdmin',
+  USER: 'User',
+};
 
 // Social Media Types
 export const SOCIAL_MEDIA_TYPES = {
@@ -66,3 +51,9 @@ export const SOCIAL_MEDIA_TYPES = {
 
 export const ALL = 'all';
 export const ANY = 'any';
+
+export const SUBSCRIPTION_STATUS = {
+  PENDING: 'Pending',
+  PAID: 'Paid',
+  REVERTED: 'Reverted',
+};

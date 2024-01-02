@@ -7,6 +7,7 @@ import { User } from '../user/entities/user.entity';
 import { Role } from '../role/entities/role.entity';
 import { RolePermission } from '../role/entities/role-permission.entity';
 import { Permission } from '../role/entities/permission.entity';
+import { MonthlySubscription } from '../auth/entities/monthly-subscriptions.entity';
 
 export const globalDbProvider = [
   TransactionInterceptor,
@@ -37,5 +38,9 @@ export const globalDbProvider = [
   {
     provide: REPOSITORIES.PERMISSION_REPOSITORY,
     useValue: Permission,
+  },
+  {
+    provide: REPOSITORIES.MONTHLY_SUBSCRIPTION_REPOSITORY,
+    useValue: MonthlySubscription,
   },
 ];
