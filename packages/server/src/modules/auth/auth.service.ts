@@ -17,9 +17,19 @@ import { AuthResetPasswordDto } from './dto/auth-reset-password.dto';
 import { LoginToken } from './entities/login-token.entity';
 import { UserContextService } from './user-context.service';
 import { Validate } from '../../helpers/validate';
-import { UNIQUE_KEY_VIOLATION } from 'src/constants';
+import {
+  DEFAULT_ROLES,
+  STRIPE_KEY,
+  STRIPE_PRODUCT_ID,
+  SUBSCRIPTION_STATUS,
+  UNIQUE_KEY_VIOLATION,
+} from 'src/constants';
 import { GlobalDbService } from '../global-db/global-db.service';
+import { Sequelize, Transaction } from 'sequelize';
+import Stripe from 'stripe';
 
+const dayjs = require('dayjs');
+const stripe = new Stripe(STRIPE_KEY);
 @Injectable()
 export class AuthService {
   constructor(
@@ -53,22 +63,26 @@ export class AuthService {
     return token;
   }
 
-  async signUp(user: any, clientInfo: any) {
+  async signUp(user: any) {
     const { password } = user;
     const userWhere: any = {};
     userWhere.username = user.username;
     const existingUser = await this.DB.getOne('User', userWhere);
+
     if (existingUser) {
       throw new ConflictException('Username already exists.');
     }
     user.salt = await bcrypt.genSalt();
     user.password = await bcrypt.hash(password, user.salt);
+
+    const uerRole = await this.DB.repo.Role.findOne({
+      where: { name: DEFAULT_ROLES.USER },
+      raw: true,
+    });
+    user.roleId = uerRole.id;
+
     try {
-      const savedUser = await this.DB.repo.User.create(user);
-      const token: any = await this.loginTokenService.generateToken(savedUser, {
-        ...clientInfo,
-      });
-      return token
+      return this.DB.repo.User.create(user);
     } catch (error) {
       if (error.parent.code === UNIQUE_KEY_VIOLATION) {
         throw new ConflictException('User already exists');
@@ -206,4 +220,124 @@ export class AuthService {
     );
     return loggedInUser;
   }
+
+  updateMonthlySubscriptionStatus = async (data: any) => {
+    const { status, userId } = data;
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1;
+    const currentYear = currentDate.getFullYear();
+
+    try {
+      await this.DB.repo.MonthlySubscription.update(
+        { status },
+        {
+          where: Sequelize.and(
+            { userId },
+            Sequelize.literal(`EXTRACT(MONTH FROM "date") = ${currentMonth}`),
+            Sequelize.literal(`EXTRACT(YEAR FROM "date") = ${currentYear}`),
+          ),
+        },
+      );
+
+      return { message: 'Subscription complete!' };
+    } catch (error) {
+      throw new ConflictException(error.message);
+    }
+  };
+
+  addNewSubscription = async (data: any, clientInfo: any) => {
+    const { repo } = this.DB;
+    const { userData, paymentData } = data;
+    const { paymentMethod: payment_method } = paymentData;
+    const savedUser = await this.signUp(userData);
+    const userId = savedUser.id;
+
+    // ----- Get or Create Customer
+    let customer: any = { id: null };
+    const response = await repo.MonthlySubscription.findOne({
+      where: { userId },
+    });
+
+    customer.id = response?.customerId;
+    if (!response) {
+      customer = await this.createCustomer(payment_method, savedUser);
+    }
+
+    const subscriptionData = {
+      priceId: STRIPE_PRODUCT_ID,
+      customerId: customer.id,
+    };
+    const subscription = await this.createSubscription(subscriptionData);
+
+    const subData: any = {
+      date: dayjs(),
+      userId,
+      createdAt: dayjs(),
+      customerId: customer.id,
+      paymentMethodId: payment_method,
+      subscriptionId: subscription.subscriptionId,
+      subscriptionItemId: subscription.subscriptionItemId,
+    };
+
+    if (subscription.status !== 'requires_action') {
+      subData.status = SUBSCRIPTION_STATUS.PAID;
+    }
+    await this.addMonthlySubscription(subData);
+
+    const loggedInUser: any = await this.loginTokenService.generateToken(
+      savedUser,
+      {
+        ...clientInfo,
+      },
+    );
+
+    return { ...subscription, loggedInUser };
+  };
+
+  addMonthlySubscription = async (data: {
+    date: Date;
+    userId: string;
+    customerId: string;
+    subscriptionId: string;
+    status: string;
+    createdAt: string;
+  }) => {
+    data.createdAt = dayjs();
+    await this.DB.repo.MonthlySubscription.create(data);
+  };
+
+  createCustomer = (payment_method: string, user: any) => {
+    const { username, email } = user;
+    const customer = {
+      payment_method,
+      name: username,
+      email,
+      invoice_settings: {
+        default_payment_method: payment_method,
+      },
+    };
+
+    return stripe.customers.create(customer);
+  };
+
+  createSubscription = async (data: {
+    customerId: string;
+    priceId: string;
+  }) => {
+    const { customerId, priceId } = data;
+
+    const response = await stripe.subscriptions.create({
+      customer: customerId,
+      items: [{ price: priceId }],
+      expand: ['latest_invoice.payment_intent'],
+    });
+
+    return {
+      clientSecret:
+        response['latest_invoice']['payment_intent']['client_secret'],
+      status: response['latest_invoice']['payment_intent']['status'],
+      subscriptionId: response.id,
+      subscriptionItemId: response.items.data[0].id,
+    };
+  };
 }

@@ -9,12 +9,12 @@ const AuthorityCheck = (props) => {
   const { auth } = useSelector((state) => state);
   const { loggedInUser } = auth;
 
-  if (_.isEmpty(authority)) {
-    if (loggedInUser.isSuperAdmin) {
-      return children;
-    }
+  if (loggedInUser.isSuperAdmin) {
+    return children;
+  }
 
-    return <></>;
+  if (_.isEmpty(authority)) {
+    return children;
   }
 
   const roleMatched = useAuthority(authority, superAdmin);

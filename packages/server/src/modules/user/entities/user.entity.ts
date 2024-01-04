@@ -1,22 +1,21 @@
 import {
-  Table,
-  Column,
-  Model,
-  PrimaryKey,
-  AutoIncrement,
-  Unique,
-  Default,
   AllowNull,
-  DataType,
-  HasOne,
-  HasMany,
-  DefaultScope,
-  Scopes,
-  ForeignKey,
   BelongsTo,
+  Column,
+  DataType,
+  Default,
+  DefaultScope,
+  ForeignKey,
+  HasMany,
+  HasOne,
+  Model,
+  Scopes,
+  Table,
+  Unique,
 } from 'sequelize-typescript';
 import { LoginToken } from 'src/modules/auth/entities/login-token.entity';
 import { Role } from 'src/modules/role/entities/role.entity';
+import { PrimaryGeneratedColumn } from 'typeorm';
 import { SuperUser } from './super-user.entity';
 
 @DefaultScope(() => ({
@@ -33,31 +32,28 @@ import { SuperUser } from './super-user.entity';
     active: { where: { isActive: true } },
   },
 })
-
 export class User extends Model {
-  @PrimaryKey
-  @AutoIncrement
-  @Column(DataType.INTEGER)
-  id: number;
-  
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
   @ForeignKey(() => Role)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     field: 'fkRoleId',
   })
-  roleId: number;
+  roleId: string;
 
   @Unique(true)
-  @Column(DataType.STRING(20))
+  @Column(DataType.TEXT)
   username: string;
 
-  @Column(DataType.STRING(100))
+  @Column(DataType.TEXT)
   password: string;
 
-  @Column(DataType.STRING(50))
+  @Column(DataType.TEXT)
   email: string;
 
-  @Column(DataType.STRING(20))
+  @Column(DataType.TEXT)
   phone: string;
 
   @Column(DataType.TEXT)
@@ -68,7 +64,7 @@ export class User extends Model {
   @Column(DataType.BOOLEAN)
   isActive: boolean;
 
-  @Column(DataType.STRING)
+  @Column(DataType.TEXT)
   salt: string;
 
   @Column(DataType.DATE)
@@ -83,17 +79,17 @@ export class User extends Model {
 
   @ForeignKey(() => User)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     field: 'fkCreatedBy',
   })
-  createdBy: number;
+  createdBy: string;
 
   @ForeignKey(() => User)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     field: 'fkUpdatedBy',
   })
-  updatedBy: number;
+  updatedBy: string;
 
   @Column(DataType.DATE)
   deletedAt: Date;

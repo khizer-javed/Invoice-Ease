@@ -31,6 +31,7 @@
     "bcryptjs": "^2.4.3",
     "class-transformer": "<=0.4.0",
     "class-validator": "^0.13.2",
+    "dayjs": "^1.11.10",
     "dotenv": "^16.0.3",
     "format-currency": "^1.0.0",
     "inline-css": "^4.0.1",
@@ -48,6 +49,8 @@
     "rxjs": "^7.2.0",
     "sequelize": "^6.25.3",
     "sequelize-typescript": "^2.1.5",
+    "stripe": "^14.10.0",
+    "typeorm": "^0.3.17",
     "uniqid": "^5.4.0"
   },
   "devDependencies": {

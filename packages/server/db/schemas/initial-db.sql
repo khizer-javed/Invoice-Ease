@@ -6,7 +6,7 @@ CREATE TABLE "login_tokens"
   "fkUserId" uuid NOT NULL,
   "token" text NOT NULL,
   "expiredAt" timestamptz,
-  "ip" varchar(50),
+  "ip" TEXT,
   "userAgent" jsonb,
   "createdAt" timestamptz NOT NULL,
   "updatedAt" timestamptz
@@ -16,13 +16,14 @@ CREATE TABLE "users"
 (
   "id" uuid DEFAULT uuid_generate_v4 () PRIMARY KEY,
   "fkRoleId" uuid NOT NULL,
-  "username" varchar(20) NOT NULL UNIQUE,
-  "password" varchar(100) NOT NULL,
-  "email" varchar(50) NOT NULL UNIQUE,
-  "phone" varchar(20),
+  "username" TEXT NOT NULL UNIQUE,
+  "password" TEXT NOT NULL,
+  "email" TEXT NOT NULL UNIQUE,
+  "phone" TEXT,
   "profilePic" text,
   "isActive" BOOLEAN NOT NULL DEFAULT '1',
-  "salt" varchar(255),
+  "salt" TEXT,
+  "customerId" TEXT,
   "createdAt" timestamptz NOT NULL,
   "updatedAt" timestamptz,
   "fkCreatedBy" uuid,
@@ -35,7 +36,7 @@ CREATE TABLE "forgot_passwords"
 (
   "id" uuid DEFAULT uuid_generate_v4 () PRIMARY KEY,
   "fkUserId" uuid NOT NULL,
-  "token" varchar(255) NOT NULL,
+  "token" TEXT NOT NULL,
   "expiredAt" timestamptz NOT NULL,
   "servedAt" timestamptz,
   "createdAt" timestamptz NOT NULL,
@@ -54,7 +55,7 @@ CREATE TABLE "super_user"
 CREATE TABLE "roles"
 (
   "id" uuid DEFAULT uuid_generate_v4 () PRIMARY KEY,
-  "name" varchar(50) NOT NULL,
+  "name" TEXT NOT NULL,
   "description" TEXT,
   "isActive" BOOLEAN NOT NULL DEFAULT '1',
   "createdAt" timestamptz NOT NULL,
@@ -89,6 +90,21 @@ CREATE TABLE "role_permissions"
   "deletedAt" timestamptz
 );
 
+CREATE TABLE "monthly_subscriptions"
+(
+  "id" uuid DEFAULT uuid_generate_v4 () PRIMARY KEY,
+  "fkUserId" uuid NOT NULL,
+  "customerId" TEXT NOT NULL,
+  "subscriptionId" TEXT NOT NULL,
+  "subscriptionItemId" TEXT NOT NULL,
+  "paymentMethodId" TEXT NOT NULL,
+  "status" TEXT DEFAULT 'Pending',
+  "date" timestamptz NOT NULL,
+  "createdAt" timestamptz NOT NULL,
+  "updatedAt" timestamptz,
+  "deletedAt" timestamptz
+);
+
 ALTER TABLE "users" ADD CONSTRAINT "users_fk0" FOREIGN KEY ("fkRoleId") REFERENCES "roles" ("id");
 ALTER TABLE "users" ADD CONSTRAINT "users_fk1" FOREIGN KEY ("fkCreatedBy") REFERENCES "users" ("id");
 ALTER TABLE "users" ADD CONSTRAINT "users_fk2" FOREIGN KEY ("fkUpdatedBy") REFERENCES "users" ("id");
@@ -104,3 +120,5 @@ ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_fk0" FOREIGN KEY
 ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_fk1" FOREIGN KEY ("fkPermissionId") REFERENCES "permissions" ("id");
 ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_fk2" FOREIGN KEY ("fkCreatedBy") REFERENCES "users" ("id");
 ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_fk3" FOREIGN KEY ("fkUpdatedBy") REFERENCES "users" ("id");
+
+ALTER TABLE "monthly_subscriptions" ADD CONSTRAINT "monthly_subscriptions_fk0" FOREIGN KEY ("fkUserId") REFERENCES "users"("id");

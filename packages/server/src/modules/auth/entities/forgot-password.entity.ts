@@ -1,14 +1,13 @@
 import {
-  Table,
-  Column,
-  Model,
-  PrimaryKey,
-  AutoIncrement,
   AllowNull,
+  Column,
   DataType,
   ForeignKey,
+  Model,
+  Table,
 } from 'sequelize-typescript';
 import { User } from 'src/modules/user/entities/user.entity';
+import { PrimaryGeneratedColumn } from 'typeorm';
 
 @Table({
   tableName: 'forgot_passwords',
@@ -18,18 +17,16 @@ import { User } from 'src/modules/user/entities/user.entity';
   },
 })
 export class ForgotPassword extends Model {
-  @PrimaryKey
-  @AutoIncrement
-  @Column(DataType.INTEGER)
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ForeignKey(() => User)
   @AllowNull(false)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     field: 'fkUserId',
   })
-  userId: number;
+  userId: string;
 
   @AllowNull(false)
   @Column(DataType.TEXT)
