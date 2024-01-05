@@ -101,28 +101,16 @@ export const protectedRoutes = [
   {
     key: "viewsetting",
     path: "/viewsetting",
-    component: React.lazy(() =>
-      import("@/views/admin-settings/view-setting/index.jsx")
-    ),
     authority: [],
-    admin: true,
   },
   {
     key: "sitesetting",
     path: "/sitesetting",
-    component: React.lazy(() =>
-      import("@/views/admin-settings/site-setting/index.jsx")
-    ),
     authority: [],
-    admin: true,
   },
   {
     key: "logout",
     path: "/logout",
-    component: React.lazy(() =>
-      import("@/views/admin-settings/logout/index.jsx")
-    ),
     authority: [],
-    admin: true,
   },
 ];

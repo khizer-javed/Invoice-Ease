@@ -16,6 +16,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { STRIPE_KEY } from "@/constants/api.constant";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import { BsInfoCircle } from "react-icons/bs";
 
 const CheckoutForm = ({ prevStep, userData }) => {
   const stripe = useStripe();
@@ -117,8 +118,13 @@ const CheckoutForm = ({ prevStep, userData }) => {
         <Button block type="button" onClick={prevStep} disabled={loading}>
           Back
         </Button>
+        {errorMessage && (
+          <div className="flex gap-1 items-center text-red-600">
+            <BsInfoCircle />
+            {errorMessage}
+          </div>
+        )}
       </div>
-      {errorMessage && <div>{errorMessage}</div>}
     </form>
   );
 };

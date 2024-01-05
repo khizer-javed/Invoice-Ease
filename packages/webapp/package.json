@@ -17,7 +17,7 @@
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
-    "@vx/pattern": "0.0.199",
+    "@vx/pattern": "^0.0.199",
     "apexcharts": "^3.35.2",
     "axios": "^0.27.2",
     "buffer": "^6.0.3",
