@@ -1,11 +1,5 @@
 import { ActionLink } from "@/components/shared";
-import appConfig from "@/configs/app.config";
-import { userSignUp } from "@/services/auth";
-import { onSignInSuccess } from "@/store/auth/sessionSlice";
-import { setLoggedInUser } from "@/store/auth/userSlice";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import SubscriptionForm from "./subscription";
 import UserDetails from "./user-details";
 
@@ -15,10 +9,6 @@ const STEPS = {
 };
 const SignUpForm = (props) => {
   const { className, signInUrl = "/sign-in" } = props;
-
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
   const [signupData, setSignupData] = useState(null);
   const [step, setStep] = useState(STEPS.SIGNUP);
 
