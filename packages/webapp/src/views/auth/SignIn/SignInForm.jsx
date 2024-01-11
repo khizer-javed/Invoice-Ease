@@ -8,15 +8,16 @@ import {
   Notification,
   toast,
 } from "@/components/ui";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { ActionLink } from "@/components/shared";
 import useAuth from "@/utils/hooks/useAuth";
+import { PasswordInput } from "@/components/shared";
 
 const SignInForm = (props) => {
   const {
-    register,
     handleSubmit,
     formState: { errors },
+    control,
   } = useForm();
 
   const {
@@ -48,39 +49,65 @@ const SignInForm = (props) => {
         <FormContainer>
           <FormItem
             label="User Name"
+            asterisk
             invalid={errors.username}
-            errorMessage='User Name is required!'
+            errorMessage="User Name is required!"
           >
-            <Input
-              {...register("username", { required: true })}
-              type="text"
-              placeholder="User Name"
+            <Controller
+              control={control}
+              name="username"
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Input
+                  type="username"
+                  placeholder="User Name"
+                  autoComplete="off"
+                  {...field}
+                />
+              )}
             />
           </FormItem>
 
           <FormItem
             label="Password"
+            asterisk
             invalid={errors.password}
-            errorMessage='Password is required!'
+            errorMessage="Password is required!"
           >
-            <Input
-              {...register("password", { required: true })}
-              type="password"
-              placeholder="Password"
+            <Controller
+              control={control}
+              name="password"
+              rules={{ required: true }}
+              render={({ field }) => (
+                <PasswordInput
+                  type="password"
+                  placeholder="Password"
+                  {...field}
+                  autoComplete="current-password"
+                />
+              )}
             />
           </FormItem>
 
           <div className="flex justify-between mb-6">
-            <Checkbox
-              {...register("rememberMe")}
-              id="rememberMe"
-              className="mb-0"
-              children="Remember Me"
+            <Controller
+              control={control}
+              name="rememberMe"
+              render={({ field }) => (
+                <Checkbox className="mb-0" children="Remember Me" {...field} />
+              )}
             />
             {/* <ActionLink to={forgotPasswordUrl}>Forgot Password?</ActionLink> */}
           </div>
 
-          <Button block loading={loading} variant="solid" type="submit" disabled={disableSubmit}>
+          <Button
+            className="mb-2"
+            block
+            loading={loading}
+            variant="solid"
+            type="submit"
+            disabled={disableSubmit}
+          >
             {loading ? "Signing in..." : "Sign In"}
           </Button>
 
