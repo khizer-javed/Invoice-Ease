@@ -320,24 +320,28 @@ export class AuthService {
     return stripe.customers.create(customer);
   };
 
-  createSubscription = async (data: {
+  createSubscription = async (body: {
     customerId: string;
     priceId: string;
   }) => {
-    const { customerId, priceId } = data;
+    const { customerId, priceId } = body;
 
-    const response = await stripe.subscriptions.create({
+    const data = {
       customer: customerId,
       items: [{ price: priceId }],
       expand: ['latest_invoice.payment_intent'],
-    });
+    };
+
+    console.log('data', data);
+
+    const response = await stripe.subscriptions.create(data);
 
     return {
       clientSecret:
         response['latest_invoice']['payment_intent']['client_secret'],
       status: response['latest_invoice']['payment_intent']['status'],
-      subscriptionId: response.id,
-      subscriptionItemId: response.items.data[0].id,
+      subscriptionId: response?.id,
+      subscriptionItemId: response?.items?.data?.[0]?.id,
     };
   };
 }
