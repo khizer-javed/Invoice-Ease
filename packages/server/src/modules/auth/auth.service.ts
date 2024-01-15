@@ -263,6 +263,8 @@ export class AuthService {
       customer = await this.createCustomer(payment_method, savedUser);
     }
 
+    console.log('STRIPE_PRODUCT_ID', STRIPE_PRODUCT_ID);
+
     const subscriptionData = {
       priceId: STRIPE_PRODUCT_ID,
       customerId: customer.id,
@@ -331,8 +333,6 @@ export class AuthService {
       items: [{ price: priceId }],
       expand: ['latest_invoice.payment_intent'],
     };
-
-    console.log('data', data);
 
     const response = await stripe.subscriptions.create(data);
 
