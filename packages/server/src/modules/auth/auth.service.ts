@@ -328,11 +328,14 @@ export class AuthService {
   }) => {
     const { customerId, priceId } = body;
 
+    console.log('body', body);
     const data = {
       customer: customerId,
       items: [{ price: priceId }],
       expand: ['latest_invoice.payment_intent'],
     };
+
+    console.log('data', data);
 
     const response = await stripe.subscriptions.create(data);
 
