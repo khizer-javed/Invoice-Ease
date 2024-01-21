@@ -263,8 +263,6 @@ export class AuthService {
       customer = await this.createCustomer(payment_method, savedUser);
     }
 
-    console.log('STRIPE_PRODUCT_ID', STRIPE_PRODUCT_ID);
-
     const subscriptionData = {
       priceId: STRIPE_PRODUCT_ID,
       customerId: customer.id,

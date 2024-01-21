@@ -4,4 +4,4 @@ RUN yarn global add nodemon sequelize-cli
 COPY . .
 RUN yarn install
 EXPOSE 4500
-CMD ["yarn", "dev"]
+CMD ["yarn", "docker-dev"]
