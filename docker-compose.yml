@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  webapp:
+    build:
+      context: ./packages/webapp
+      dockerfile: Dockerfile
+    env_file:
+      - ./packages/webapp/.env
+    ports:
+      - "3000:3000"
+
+  server:
+    build:
+      context: ./packages/server
+      dockerfile: Dockerfile
+    env_file:
+      - ./packages/webapp/.env
+    ports:
+      - "4500:4500"
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: invoice-ease
+    depends_on:
+      - db
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: invoice-ease
