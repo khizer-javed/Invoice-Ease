@@ -10,7 +10,7 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "yarn install && sequelize db:migrate && nest start",
-    "docker-dev": "sequelize db:migrate && nest start --watch",
+    "docker-dev": "yarn install && sequelize db:migrate && nest start --watch",
     "dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
